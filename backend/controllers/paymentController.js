@@ -3,7 +3,6 @@ const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
 const Order = require("../models/Order");
 const Transaction = require("../models/Transaction");
 
-// Buyer initiates payment
 exports.createPaymentIntent = async (req, res) => {
   try {
     const { orderId } = req.body;
