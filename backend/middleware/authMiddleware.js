@@ -1,29 +1,22 @@
 const jwt = require("jsonwebtoken");
 
-// Protect routes
 const authMiddleware = (req, res, next) => {
-  const authHeader = req.headers.authorization;
-
-  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+  const header = req.headers.authorization;
+  if (!header || !header.startsWith("Bearer "))
     return res.status(401).json({ message: "No token, authorization denied" });
-  }
 
-  const token = authHeader.split(" ")[1];
-
+  const token = header.split(" ")[1];
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     req.user = decoded; // { id, role }
     next();
-  } catch (error) {
+  } catch (e) {
     return res.status(401).json({ message: "Invalid or expired token" });
   }
 };
 
-// Admin check
 const adminMiddleware = (req, res, next) => {
-  if (req.user.role !== "admin") {
-    return res.status(403).json({ message: "Access denied, admin only" });
-  }
+  if (req.user.role !== "admin") return res.status(403).json({ message: "Admin only" });
   next();
 };
 
