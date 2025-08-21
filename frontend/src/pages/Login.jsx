@@ -1,15 +1,20 @@
 import React, { useState, useContext } from "react";
 import api from "../utils/axios";
 import { AuthContext } from "../context/AuthContext";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link, useLocation } from "react-router-dom";
 
 export default function Login() {
   const [form, setForm] = useState({ email: "", password: "" });
   const [error, setError] = useState(null);
   const { login } = useContext(AuthContext);
   const navigate = useNavigate();
+  const location = useLocation();
 
-  const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
+  // If redirected from ProtectedRoute, we’ll have state.from
+  const from = location.state?.from?.pathname || "/dashboard";
+
+  const handleChange = (e) =>
+    setForm({ ...form, [e.target.name]: e.target.value });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -20,7 +25,7 @@ export default function Login() {
     try {
       const res = await api.post("/auth/login", form);
       login(res.data.user, res.data.token);
-      navigate("/dashboard");
+      navigate(from, { replace: true }); // ✅ redirect back to original page
     } catch (err) {
       setError(err.response?.data?.message || "Login failed");
     }
@@ -42,7 +47,9 @@ export default function Login() {
             placeholder="Email"
             value={form.email}
             onChange={handleChange}
-            className={`w-full p-3 border rounded ${error && !form.email ? "border-red-500" : "border-gray-300"}`}
+            className={`w-full p-3 border rounded ${
+              error && !form.email ? "border-red-500" : "border-gray-300"
+            }`}
           />
           <input
             type="password"
@@ -50,13 +57,22 @@ export default function Login() {
             placeholder="Password"
             value={form.password}
             onChange={handleChange}
-            className={`w-full p-3 border rounded ${error && !form.password ? "border-red-500" : "border-gray-300"}`}
+            className={`w-full p-3 border rounded ${
+              error && !form.password ? "border-red-500" : "border-gray-300"
+            }`}
           />
+
           <div className="flex items-center gap-2">
             <input type="checkbox" id="remember" className="h-4 w-4" />
-            <label htmlFor="remember" className="text-gray-600 text-sm">Remember Me</label>
+            <label htmlFor="remember" className="text-gray-600 text-sm">
+              Remember Me
+            </label>
           </div>
-          <button type="submit" className="w-full bg-blue-600 text-white py-3 rounded hover:bg-blue-700 transition">
+
+          <button
+            type="submit"
+            className="w-full bg-blue-600 text-white py-3 rounded hover:bg-blue-700 transition"
+          >
             Login
           </button>
         </form>
@@ -69,7 +85,9 @@ export default function Login() {
 
         <p className="text-center mt-6 text-gray-600 text-sm">
           Don’t have an account?{" "}
-          <Link to="/register" className="text-blue-600 hover:underline">Register here</Link>
+          <Link to="/register" className="text-blue-600 hover:underline">
+            Register here
+          </Link>
         </p>
       </div>
     </div>
